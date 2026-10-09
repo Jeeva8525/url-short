@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Create Short Link</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-1: #0b1020;
+    --bg-2: #111a33;
+    --card: #1e293b;
+    --field: #111827;
+    --border: #2b3750;
+    --text: #f8fafc;
+    --muted: #94a3b8;
+    --label: #cbd5e1;
+    --blue-1: #3b82f6;
+    --blue-2: #2563eb;
+    --ok: #34d399;
+    --err: #f87171;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { height: 100%; margin: 0; }
+
+  body {
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(1200px 600px at 0% 0%, #16224a 0%, transparent 60%),
+      linear-gradient(135deg, var(--bg-2), var(--bg-1));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 1240px;
+    background: var(--card);
+    border: 1px solid #2a364d;
+    border-radius: 28px;
+    padding: 34px 34px 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  }
+
+  h1 {
+    margin: 0 0 12px;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .subtitle {
+    margin: 0 0 36px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 170px;
+    gap: 18px;
+    align-items: center;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin-top: 22px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--label);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  input {
+    width: 100%;
+    height: 50px;
+    padding: 0 20px;
+    background: var(--field);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    color: var(--text);
+    font: inherit;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  input::placeholder { color: #64748b; }
+
+  input:focus-visible {
+    border-color: var(--blue-1);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+  }
+
+  input[type="datetime-local"] {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color-scheme: dark;
+  }
+
+  button.shorten {
+    height: 50px;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--blue-1), var(--blue-2));
+    color: #fff;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.35);
+    transition: transform 0.1s, filter 0.15s;
+  }
+
+  button.shorten:hover:not(:disabled) { filter: brightness(1.08); }
+  button.shorten:active:not(:disabled) { transform: translateY(1px); }
+  button.shorten:focus-visible { outline: 3px solid rgba(147, 197, 253, 0.6); outline-offset: 2px; }
+  button.shorten:disabled { opacity: 0.65; cursor: progress; }
+
+  .result {
+    display: none;
+    margin-top: 26px;
+    padding: 16px 20px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--field);
+    font-size: 15px;
+    word-break: break-word;
+  }
+
+  .result.show { display: block; }
+  .result.success { border-color: rgba(52, 211, 153, 0.5); }
+  .result.error { border-color: rgba(248, 113, 113, 0.55); color: var(--err); }
+
+  .result .caption {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .success-line {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .success-line a {
+    color: var(--ok);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .success-line a:hover { text-decoration: underline; }
+
+  button.copy {
+    height: 34px;
+    padding: 0 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--label);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  button.copy:hover { border-color: var(--blue-1); color: var(--text); }
+  button.copy:focus-visible { outline: 3px solid rgba(147, 197, 253, 0.6); outline-offset: 2px; }
+
+  @media (max-width: 720px) {
+    .card { padding: 24px 20px 28px; border-radius: 22px; }
+    .row, .grid-2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <main class="card">
+    <h1>Create Short Link</h1>
+    <p class="subtitle">Paste your long URL below and generate a shareable short link instantly.</p>
+
+    <div class="row">
+      <input id="url" type="url" placeholder="https://example.com/very-long-url" aria-label="Long URL" autocomplete="off">
+      <button id="shorten" class="shorten" type="button">Shorten</button>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <label for="alias">Custom Alias</label>
+        <input id="alias" type="text" placeholder="optional" autocomplete="off">
+      </div>
+      <div>
+        <label for="expiry">Expiry Date</label>
+        <input id="expiry" type="datetime-local">
+      </div>
+    </div>
+
+    <div id="result" class="result" role="status" aria-live="polite"></div>
+  </main>
+
+<script>
+  // ---- Configuration ----------------------------------------------------
+  const API_BASE = "https://prithivs.in/api";
+  const LOGIN_EMAIL = "august@gmail.com";
+  const LOGIN_PASSWORD = "august@url";
+  // -----------------------------------------------------------------------
+
+  const urlInput = document.getElementById("url");
+  const aliasInput = document.getElementById("alias");
+  const expiryInput = document.getElementById("expiry");
+  const button = document.getElementById("shorten");
+  const resultBox = document.getElementById("result");
+
+  async function readJson(res) {
+    // Some error responses may not be JSON, so parse defensively.
+    const text = await res.text();
+    try { return text ? JSON.parse(text) : {}; } catch { return { message: text }; }
+  }
+
+  function errorMessage(data, res, fallback) {
+    return data.error || data.message || `${fallback} (HTTP ${res.status})`;
+  }
+
+  async function login() {
+    const res = await fetch(`${API_BASE}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: LOGIN_EMAIL, password: LOGIN_PASSWORD })
+    });
+    const data = await readJson(res);
+    if (!res.ok) throw new Error(errorMessage(data, res, "Login failed"));
+    if (!data.token) throw new Error("Login succeeded but no token was returned.");
+    return data.token;
+  }
+
+  async function createLink(token, originalUrl, customAlias, expiresAt) {
+    const res = await fetch(`${API_BASE}/links`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      // expiresAt format from datetime-local: "2026-10-17T19:15"
+      // empty optional fields are sent as null
+      body: JSON.stringify({ originalUrl, expiresAt, customAlias })
+    });
+    const data = await readJson(res);
+    if (!res.ok) throw new Error(errorMessage(data, res, "Could not shorten the link"));
+    if (!data.shortUrl) throw new Error("The response did not include a short URL.");
+    return data.shortUrl;
+  }
+
+  function showError(message) {
+    resultBox.className = "result show error";
+    resultBox.textContent = message;
+  }
+
+  function showSuccess(shortUrl) {
+    resultBox.className = "result show success";
+    resultBox.textContent = "";
+
+    const caption = document.createElement("span");
+    caption.className = "caption";
+    caption.textContent = "Your short link";
+
+    const line = document.createElement("div");
+    line.className = "success-line";
+
+    const link = document.createElement("a");
+    link.href = shortUrl;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = shortUrl;
+
+    const copy = document.createElement("button");
+    copy.type = "button";
+    copy.className = "copy";
+    copy.textContent = "Copy";
+    copy.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(shortUrl);
+        copy.textContent = "Copied";
+      } catch {
+        copy.textContent = "Copy failed";
+      }
+      setTimeout(() => (copy.textContent = "Copy"), 1500);
+    });
+
+    line.append(link, copy);
+    resultBox.append(caption, line);
+  }
+
+  async function handleShorten() {
+    const originalUrl = urlInput.value.trim();
+    const customAlias = aliasInput.value.trim() || null;
+    const expiresAt = expiryInput.value || null;
+
+    if (!originalUrl) {
+      showError("Enter a URL to shorten.");
+      urlInput.focus();
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent = "Shortening...";
+    resultBox.className = "result";
+
+    try {
+      const token = await login();
+      const shortUrl = await createLink(token, originalUrl, customAlias, expiresAt);
+      showSuccess(shortUrl);
+    } catch (err) {
+      // fetch() throws a TypeError on network or CORS failures
+      const msg = err instanceof TypeError
+        ? "Could not reach the server. Check your connection, or the API's CORS settings."
+        : err.message;
+      showError(msg);
+    } finally {
+      button.disabled = false;
+      button.textContent = "Shorten";
+    }
+  }
+
+  button.addEventListener("click", handleShorten);
+  urlInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") handleShorten();
+  });
+</script>
+</body>
+</html>
