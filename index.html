@@ -217,6 +217,7 @@
 <script>
   // ---- Configuration ----------------------------------------------------
   const API_BASE = "https://prithivs.in/api";
+  const SHORT_BASE = "https://url.jeevananthan.me";
   const LOGIN_EMAIL = "august@gmail.com";
   const LOGIN_PASSWORD = "august@url";
   // -----------------------------------------------------------------------
@@ -263,7 +264,19 @@
     const data = await readJson(res);
     if (!res.ok) throw new Error(errorMessage(data, res, "Could not shorten the link"));
     if (!data.shortUrl) throw new Error("The response did not include a short URL.");
-    return data.shortUrl;
+    return toDisplayUrl(data.shortUrl);
+  }
+
+  // Swap the API's domain (prithivs.in) for our own short-link domain,
+  // keeping the code/path that comes after it.
+  function toDisplayUrl(shortUrl) {
+    try {
+      const u = new URL(shortUrl);
+      return `${SHORT_BASE}${u.pathname}${u.search}`;
+    } catch {
+      // Not an absolute URL, so treat it as just the code
+      return `${SHORT_BASE}/${String(shortUrl).replace(/^\/+/, "")}`;
+    }
   }
 
   function showError(message) {
