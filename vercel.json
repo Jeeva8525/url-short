@@ -2,7 +2,7 @@
   "redirects": [
     {
       "source": "/:code",
-      "destination": "https://prithivs.in/:code",
+      "destination": "https://prithivs.in/alias.:code",
       "permanent": false
     }
   ]
