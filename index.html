@@ -268,14 +268,18 @@
   }
 
   // Swap the API's domain (prithivs.in) for our own short-link domain,
-  // keeping the code/path that comes after it.
+  // and strip the "alias." prefix we add before sending the alias to the
+  // API, so the displayed link stays e.g. url.jeevananthan.me/proj even
+  // though prithivs.in actually stored it as prithivs.in/alias.proj.
   function toDisplayUrl(shortUrl) {
     try {
       const u = new URL(shortUrl);
-      return `${SHORT_BASE}${u.pathname}${u.search}`;
+      const cleanPath = u.pathname.replace(/\/alias\.([^/]+)$/, "/$1");
+      return `${SHORT_BASE}${cleanPath}${u.search}`;
     } catch {
       // Not an absolute URL, so treat it as just the code
-      return `${SHORT_BASE}/${String(shortUrl).replace(/^\/+/, "")}`;
+      const code = String(shortUrl).replace(/^\/+/, "").replace(/^alias\./, "");
+      return `${SHORT_BASE}/${code}`;
     }
   }
 
@@ -321,7 +325,10 @@
 
   async function handleShorten() {
     const originalUrl = urlInput.value.trim();
-    const customAlias = aliasInput.value.trim() || null;
+    const rawAlias = aliasInput.value.trim();
+    // Send "alias.<what the user typed>" to prithivs.in, but we still
+    // display/store just "<what the user typed>" on our own domain.
+    const customAlias = rawAlias ? `alias.${rawAlias}` : null;
     const expiresAt = expiryInput.value || null;
 
     if (!originalUrl) {
