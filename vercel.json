@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/:code",
+      "destination": "https://prithivs.in/:code",
+      "permanent": false
+    }
+  ]
+}
